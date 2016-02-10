@@ -1,0 +1,280 @@
+---
+title: "project4"
+output: html_document
+---
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+data<-read.csv("wineQualityReds.csv")
+
+
+```
+
+#Univariate Plots Section
+```{r}
+
+
+
+
+dim(data)
+names(data)
+str(data)
+summary(data)
+
+library(ggplot2)
+integer_data<-data$quality
+quality_data<-as.factor(data$quality)
+data$X<-NULL
+#delete X colum bacause it means nothing 
+
+
+ggplot(aes(x=quality),data=data)+
+  geom_histogram()
+ggplot(aes(x=quality),data=data)+
+  geom_histogram(binwidth=1)+
+  scale_x_continuous(breaks = seq(0, 10, 1))
+#In order to observe quality value
+
+data$quality<-NULL
+data$quality<-quality_data
+#change integer value to factor value because data$quality is categorical value 
+
+qplot(x=fixed.acidity,data=data)
+ggplot(aes(x=fixed.acidity),data=data)+
+  geom_histogram(binwidth=0.05)
+summary(data$fixed.acidity)
+
+ggplot(aes(x=volatile.acidity),data=data)+
+  geom_histogram()
+ggplot(aes(x=volatile.acidity),data=data)+
+  geom_histogram(binwidth = 0.01)+
+  scale_x_continuous(breaks = seq(0, 10, 0.1),limits=c(0,1))
+summary(data$volatile.acidity)
+
+ggplot(aes(x=citric.acid),data=data)+
+  geom_histogram()
+ggplot(aes(x=citric.acid),data=data)+
+  geom_histogram(binwidth=0.01)+
+  scale_x_continuous(breaks = seq(0, 10, 0.1),limits=c(0,1))
+summary(data$citric.acid)
+
+ggplot(aes(x=residual.sugar),data=data)+
+  geom_histogram()
+ggplot(aes(x=residual.sugar),data=data)+
+  geom_histogram(binwidth=0.05)+
+  scale_x_continuous(breaks = seq(0, 4, 0.5),limits=c(1,4))
+summary(data$residual.sugar)
+
+ggplot(aes(x=chlorides),data=data)+
+  geom_histogram()
+ggplot(aes(x=chlorides),data=data)+
+  geom_histogram(binwidth=0.001)+
+  scale_x_continuous(breaks = seq(0.05, 0.15, 0.01),limits=c(0.05,0.11))
+sd(data$chlorides)
+#chlorides are concentrated around 0.08 and really small standard deviaiton, 0.047
+summary(data$chlorides)
+
+ggplot(aes(x=free.sulfur.dioxide),data=data)+
+  geom_histogram()
+ggplot(aes(x=free.sulfur.dioxide),data=data)+
+  scale_x_sqrt()+
+  geom_histogram(binwidth=0.5)
+summary(data$free.sulfur.dioxide)
+
+
+ggplot(aes(x=total.sulfur.dioxide),data=data)+
+  geom_histogram()
+ggplot(aes(x=total.sulfur.dioxide),data=data)+
+  geom_histogram(binwidth=1)+
+  scale_x_sqrt()+
+  scale_x_continuous(breaks = seq(0, 100, 10),limits=c(0,100))
+#Since original histogram of total sulfur is skewed to right, I used scale_x_sqrt function to make data more understandable.
+summary(data$total.sulfur.dioxide)
+
+ggplot(aes(x=density),data=data)+
+  geom_histogram()
+ggplot(aes(x=density),data=data)+
+  geom_histogram(binwidth=0.0001)
+summary(data$density)
+sd(data$density)
+
+ggplot(aes(x=pH),data=data)+
+  geom_histogram()
+ggplot(aes(x=pH),data=data)+
+  geom_histogram(binwidth=0.01)
+summary(data$pH)
+
+ggplot(aes(x=sulphates),data=data)+
+  geom_histogram()
+ggplot(aes(x=sulphates),data=data)+
+  geom_histogram(binwidth=0.01)+
+  scale_x_continuous(breaks = seq(0, 1, 0.1),limits=c(0.4,1))
+summary(data$sulphates)
+
+ggplot(aes(x=alcohol),data=data)+
+  geom_histogram()
+ggplot(aes(x=alcohol),data=data)+
+  geom_histogram(binwidth=0.1)+
+  scale_x_continuous(breaks = seq(9, 13,1 ),limits=c(9,13))
+summary(data$alcohol)
+```
+
+
+
+#Univariate Analysis
+```{r}
+#What_is_the_structure_of_your_dataset?
+#There are 1599 wine data with 12 variables. I deleted X and quality colum and created categorical data$quality colum. 
+
+#What is/are the main feature(s) of interest in your dataset?
+#As long as I read description of data set, I suspect volatile acidity, residual sugar, and chlorides since these factors seems to directly cause effect on taste of wine. I???d like to determine which features are best for predicting the price of a diamond. 
+
+
+#Of the features you investigated, were there any unusual distributions? Did you perform any operations on the data to tidy, adjust, or change the form of the data? If so, why did you do this?
+#I square root transformed the right skewed total sulfur distribution. The transformed distribution became more similar to normal distribution shape. 
+
+
+```
+
+#Bivariate Plots Section
+```{r}
+library(GGally)
+ggpairs(data)
+#I want to look closer at scatter plots involving price and some other variables: volatile.acidity, density, sulphates, and alcohol.
+
+ggplot(aes(x=quality,y=volatile.acidity), data=data)+
+  geom_boxplot(aes(fill = quality))+
+  coord_flip()
+#Looks like there is a negative correlation 
+  
+ggplot(aes(x=quality,y=density), data=data)+
+  geom_boxplot()+
+  coord_flip()
+ggplot(aes(x=quality,y=density), data=data)+
+  geom_boxplot(aes(fill = quality))+
+  coord_flip()
+sd(data$density)
+by(data$density,data$quality,sd)
+#Density boxplot's range is mainly overlapped.
+  
+ggplot(aes(x=quality,y=sulphates), data=data)+
+  geom_boxplot()
+ggplot(aes(x=sulphates),data=data)+
+  geom_histogram()
+sd(data$sulphates)
+by(data$sulphates,data$quality,sd)
+#Sulphates variable has many outliers in its boxplot
+
+#density and sulphates variables show similar type of distribution in a graph. Both of them change its value within the range of quality, but since its ranges are pretty narrow I am not sure their differences are statistically significant. 
+
+ggplot(aes(x=quality,y=alcohol), data=data)+
+  geom_boxplot(aes(fill = quality))+
+  coord_flip()
+by(data$alcohol,data$quality,length)
+#Quality 5 and 6 occupy most alcohol values.
+#Even though quality 5 has some outliers, it looks like there is a positive correlation.
+```
+
+#Bivariate Analysis
+```{r}
+
+#Talk about some of the relationships you observed in this part of the investigation. How did the feature(s) of interest vary with other features in the dataset?
+#Alcohol and volatile.acidity correlate with quality. 
+
+#On the other hand, density and sulphates indicte relatively similar value.
+
+#Did you observe any interesting relationships between the other features (not the main feature(s) of interest)?
+#Density and fixed.acidity show 0.668 correlation.
+#Alcohol and density indicate -0.496 correlation.
+
+
+#What was the strongest relationship you found?
+#Alcohol and volatile.acidity show relativey strong correlation with quality of wine.
+```
+```
+Multivariate Plots Section
+```{r}
+
+ggplot(aes(x = alcohol, y = volatile.acidity, color = quality), data = data)+
+  geom_point(alpha = 1, size = 1.5)+
+  scale_color_brewer(type = 'div',
+                     guide = guide_legend(title = 'Quality', reverse = T,
+                                          override.aes = list(alpha = 1, size = 2)))
+#Create scatter plot based on alcohol and volatile.acidity with color in quality.
+#You can see the color is changing from up-left to bottom-right.
+
+#change quality value from factor to integer in order to do multiple regression.
+data$quality<-NULL
+data$quality<-integer_data
+
+result <- lm(data$quality~data$volatile.acidity+data$alcohol)
+summary(result)
+#Each independent variables' p-values are small(<2e-16).
+#Adjusted R-squared is 0.3161. Almost 30 % of quality value is explained by this model.
+```
+
+Multivariate Analysis
+```{r}
+#Talk about some of the relationships you observed in this part of the investigation. Were there features that strengthened each other in terms of looking at your feature(s) of interest?
+
+#By plotting quality variable with color, I could observed that how volatile.acidity and alcohol correlate with quality.
+
+#Were there any interesting or surprising interactions between features?
+#There is a interesting correlation, but it is not that strong compared with diamond's example. 
+```
+
+#Final_Plots_and_Summary
+```{r}
+#Plot_One
+ggplot(aes(x=quality),data=data)+
+  geom_histogram(binwidth=1)+
+  scale_x_continuous(breaks = seq(0, 10, 1))
+
+#Description One
+#Shape looks like normal distribution. 
+#In this report, I considered quality value as categorical value.
+#In order to make a histogram and conduct multiple regression, I changed its value to integer.
+
+
+#Plot Two
+#change quality value to factor
+data$quality<-NULL
+data$quality<-quality_data
+
+ggplot(aes(x=quality,y=volatile.acidity), data=data)+
+  geom_boxplot(aes(fill = quality))+
+  coord_flip()
+ggplot(aes(x=quality,y=alcohol), data=data)+
+  geom_boxplot(aes(fill = quality))+
+  coord_flip()
+
+#Description_Two
+#Although model has some outliers, they are correlates with quality of wine.
+
+#Plot Three
+ggplot(aes(x = alcohol, y = volatile.acidity, color = quality), data = data)+
+  geom_point(alpha = 1, size = 1.5)+
+  scale_color_brewer(type = 'div',
+                     guide = guide_legend(title = 'Quality', reverse = T,
+                                          override.aes = list(alpha = 1, size = 2)))
+
+#Description_Three
+#Color is changing from top-left to bottom-right. Since there is a pattern in this graph, the value of quality can be predictive.  
+
+
+```
+
+#Reflection
+```{r}
+#From my research, I confirmed that there is a correlation quality and some variables. Based on my plot three, there is a certain pattern in its graph. In addition, multiple regression made from plot three shows 0.3161 adjusted r-squared. 
+
+```
+
+
+
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
