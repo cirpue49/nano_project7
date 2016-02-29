@@ -4,7 +4,6 @@
     <meta charset="utf-8">
     <script src="http://d3js.org/d3.v3.min.js"></script>
     <script src="http://dimplejs.org/dist/dimple.v2.0.0.min.js"></script>
-    
     <style>
       h2 {
         color: black;
@@ -54,9 +53,43 @@
         font-size: 10px;
         font-family: sans-serif;
       }
+
+      body {
+        font: 10px sans-serif;
+      }
+
+      .legend {
+        font-size: 12px;
+        font-family: sans-serif;
+      }
+
+
+       /*circle legend*/
+      .legend path,
+      .legend line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+        opacity: 1;
+      }
+
+      .circle-legend line {
+        stroke: #000;
+        shape-rendering: crispEdges;
+
+      }
+
+      .circle-legend circle {
+        stroke: #ccc;
+        stroke-dasharray: 4, 2;
+        fill: none;
+      }
+
     </style>
 
     <script type="text/javascript">
+      
+
       function draw(data) {
       
       /*
@@ -125,7 +158,7 @@
             .domain(count_extent);
 
           // Create bubble chart scale mapping HR -> radius
-          var bubble_scale = d3.scale.linear()
+          var bubble_scale = d3.scale.sqrt()
             .range([1, 20])
             .domain(bubble_extent);
 
@@ -198,8 +231,16 @@
             .attr("text-anchor", "middle")
             .style("font-size", "20px")
             .style("font-family", "sans-serif")
-            .text("Player Performance with Body size");
+            .text("Correlation of player performance between number of homerun and hitting average");
 
+          
+          svg.append("text")
+            .attr("x", (width + 40 )/ 2)
+            .attr("y", 40)
+            .attr("text-anchor", "middle")
+            .style("font-size", "20px")
+            .style("font-family", "sans-serif")
+            .text("& Correlation between player perfomance and body size")
 
           
 
@@ -249,6 +290,40 @@
                   }
               });
 
+          svg.append("text")
+            .attr("x", 1173)
+            .attr("y", 75)
+            .attr("class", "text-label")
+            .attr("text-anchor", "middle")
+            .style("font-size", "13px")
+            .text("Big body:");
+          svg.append("text")
+            .attr("x", 1270)
+            .attr("y", 90)
+            .attr("class", "text-label")
+            .attr("text-anchor", "middle")
+            .style("font-size", "13px")
+            .text("1.0 - 2.0 in minmax scaled (weight + height)");
+
+          svg.append("text")
+            .attr("x", 1178)
+            .attr("y", 110)
+            .attr("class", "text-label")
+            .attr("text-anchor", "middle")
+            .style("font-size", "13px")
+            .text("Small body:");
+          svg.append("text")
+            .attr("x", 1270)
+            .attr("y", 125)
+            .attr("class", "text-label")
+            .attr("text-anchor", "middle")
+            .style("font-size", "13px")
+            .text("0.0 - 1.0 in minmax scaled (weight + height)");
+
+
+
+          //circle legend 
+          
           legend.append("text")
               .attr("y", function(d, i) {
                   return i * 30 + 5;
@@ -258,7 +333,184 @@
                   return d;
               });
 
+          bubble_scale.range([1, 25]);
+          
+
+
+          var circleKey2 = circleLegend()
+              .scale(bubble_scale)
+              .tickValues([ 25, 150, 500])
+              // .tickFormat(formatCurrencySI)
+              .tickPadding(10)
+              .orient("left"); //default
+
+          svg.append('g')
+            .attr('transform', 'translate(1275, 180)')
+            .call(circleKey2);
+
+          // title of circle legend
+          svg.append("text")
+            .attr("x", 1280)
+            .attr("y", 195)
+            .attr("class", "text-label")
+            .attr("text-anchor", "middle")
+            .style("font-size", "13px")
+            .text("Number of Homerun");
+
+                 
+
+          // var circleKey = circleLegend()
+          //     .scale(bubble_scale)
+          //     .tickValues([0, 100, 250, 500])
+          //     .tickFormat(formatCurrencySI)
+          //     .tickPadding(10)
+          //     .orient("left"); //default
+
+          // svg.append('g')
+          //   .attr('transform', 'translate(150, 300)')
+          //   .call(circleKey);
+                
           };
+
+
+      var circleLegend = function() {
+          'use strict';
+
+          var bubble_scale,
+              orient = 'left',
+              tickPadding = 3,
+              tickExtend = 5,
+              tickArguments_ = [10],
+              tickValues = null,
+              tickFormat_,
+              ε = 1e-6;
+
+
+          function key(selection) {
+            selection.each(function() {
+              var g = d3.select(this);
+
+              g.attr('class', 'circle-legend');
+
+              // Stash a snapshot of the new scale, and retrieve the old snapshot.
+              var scale0 = this.__chart__ || bubble_scale,
+                  scale1 = this.__chart__ = bubble_scale.copy();
+
+              // Ticks, or domain values for ordinal scales.
+              var ticks = tickValues == null ? (bubble_scale.ticks ? bubble_scale.ticks.apply(bubble_scale, tickArguments_) : bubble_scale.domain()) : tickValues,
+                  ticks = ticks.slice().filter(function(d) { return d > 0 }).sort(d3.descending),
+                  tickFormat = tickFormat_ == null ? (bubble_scale.tickFormat ? bubble_scale.tickFormat.apply(bubble_scale, tickArguments_) : String) : tickFormat_,
+                  tick = g.selectAll('.tick').data(ticks, scale1),
+                  tickEnter = tick.enter().insert('g', '.tick').attr('class', 'tick').style('opacity', ε),
+                  tickExit = d3.transition(tick.exit()).style('opacity', ε).remove(),
+                  tickUpdate = d3.transition(tick.order()).style('opacity', 1),
+                  tickTransform;
+
+              tickEnter.each(function(tick) {
+                var gg = d3.select(this);
+
+                var tickText = tickFormat(tick);
+
+                if (!tickText) return;
+
+                gg.append('circle')
+                  .attr('cx', 0)
+                  .attr('cy', 0)
+                  .attr('r', bubble_scale(tick));
+
+                gg.append('line')
+                  .attr('y1', 0)
+                  .attr('y2', 0)
+                  .attr('stroke', '#000')
+                  .text(tick);
+
+                gg.append('text')
+                  .attr('dy', '.35em')
+                  .style('text-anchor', 'left' == orient ? 'end' : 'start')
+                  .text(tickText);
+
+              });
+              tickEnter.call(d3_svg_legend, scale0);
+              tickUpdate.call(d3_svg_legend, scale1);
+              tickExit.call(d3_svg_legend, scale1);
+
+              function d3_svg_legend(selection, bubble_scale) {
+                selection.select('circle')
+                  .attr('r', bubble_scale);
+
+                var x2 = bubble_scale(ticks[0]) + tickExtend;
+                var sign = 'left' == orient ? -1 : 1;
+
+                selection.select('text')
+                  .attr('transform', 'translate(' + (x2 + tickPadding) * sign + ', 0)');
+
+                selection.select('line')
+                  .attr('x1', function(d) { return bubble_scale(d) * sign })
+                  .attr('x2', x2 * sign);
+
+                selection.attr('transform', function(d) { return 'translate(0,' + -bubble_scale(d) + ')'; });
+              }
+
+            });
+          }
+
+          key.scale = function(value) {
+            if (!arguments.length) return bubble_scale;
+            bubble_scale = value;
+            return key;
+          };
+
+          key.orient = function(value) {
+            if (!arguments.length) return orient;
+            orient = value;
+            return key;
+          };
+
+          key.ticks = function() {
+            if (!arguments.length) return tickArguments_;
+            tickArguments_ = arguments;
+            return key;
+          };
+
+          key.tickFormat = function(x) {
+            if (!arguments.length) return tickFormat_;
+            tickFormat_ = x;
+            return key;
+          };
+
+          key.tickValues = function(x) {
+            if (!arguments.length) return tickValues;
+            tickValues = x;
+            return key;
+          };
+
+          key.tickPadding = function(x) {
+            if (!arguments.length) return tickPadding;
+            tickPadding = +x;
+            return key;
+          };
+
+          key.tickExtend = function(x) {
+            if (!arguments.length) return tickExtend;
+            tickExtend = +x;
+            return key;
+          };
+
+          key.width = function(value) {
+            if (!arguments.length) return width;
+            width = value;
+            return key;
+          };
+
+          key.height = function(value) {
+            if (!arguments.length) return height;
+            height = value;
+            return key;
+          };
+
+          return key;
+        };
+
 
     </script>
   </head>

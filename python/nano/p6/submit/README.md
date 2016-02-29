@@ -11,7 +11,11 @@ Design
     From my data visualization, I want to tell two points in baseball data. First, there is a positive correlation between hitting average and the number of homerun. The second point is that bigger sized players more likely to hit homerun. 
 
 Feedback
-    I got feedback from three person. First, my graph fails to tell any messages since there are too many plots. Second, X axis should be narrow down sinc plots are concentrated on more than 0.20 in X axis. Third is that it is weird to use two measurements to represent the number of homerun.
+    I always asked my friends three questions. First, What do you think about this graph?. I wanted to know first impression of my graph. Second, My messages are properly conveyed or not. My messages are about correlation betweeen number of homerun and correlation between body size and player performance. Third, in order to make better data visualization which convey my messages, what can I improve in my graph. 
+
+    I got feedback from three person. First, my graph fails to tell any messages since there are too many plots. I implemented bubble chart to draw readers attention to some plots.
+    Second, X axis should be narrow down since plots are concentrated on more than 0.20 in X axis. I did not change my x axis since if I did, my first message would not properly conveyed. 
+    Third is that it is weird to use two measurements to represent the number of homerun. It might be wired, but I decided to use two measurements for homerun to convey my messages. In addition, I encourage peole to understand what the circle side stands for by adding circular legend.
 
 Resources
     Scatter Plot Example "https://bl.ocks.org/weiglemc/6185069"
